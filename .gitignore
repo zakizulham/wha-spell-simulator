@@ -1,11 +1,39 @@
-# IDE
+# ==========================================
+# IDE & AI Assistant Editor
+# ==========================================
 .vscode/
-
-# AI assistant
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
 .codex/
 .claude/
 
-# node
+# ==========================================
+# Node / JavaScript Dependencies & Builds
+# ==========================================
 node_modules/
 dist/
 npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.vite/
+
+# ==========================================
+# Python Environments & Compiled Bytecode
+# ==========================================
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+.venv/
+
+# ==========================================
+# Local Project Diagnostics & Scratchpads
+# ==========================================
+debug_output/
+scratch/
+.DS_Store
+Thumbs.db
