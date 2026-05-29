@@ -107,9 +107,52 @@ export class DrawingCapture {
     if (points.length >= 2 && pathLength(points) >= this.config.input.minStrokeLength) {
       this.strokeStore.addStroke(points);
       this.callbacks.onCommit?.();
+
+      // ==========================================
+      // INJEKSI JALUR SIHIR: TRANSMISI WI-FI API
+      // ==========================================
+      this.sendCanvasToPythonBackend();
+
       return;
     }
 
     this.callbacks.onPreview?.(null);
+  }
+
+  /**
+   * Mengonversi frame kertas canvas aktif menjadi Base64 string 
+   * dan menembakkannya ke mesin deterministik Python OpenCV.
+   */
+  sendCanvasToPythonBackend() {
+    try {
+      // Ambil snapshot gambar canvas dalam format data URL Base64 PNG
+      const imageDataBase64 = this.canvas.toDataURL("image/png");
+
+      fetch("http://192.168.1.17:8000/api/parse-spell", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          session_id: "android_tablet_stylus",
+          image_base64: imageDataBase64
+        })
+      })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`HTTP Network Error: ${response.status}`);
+          }
+          return response.json();
+        })
+        .then(data => {
+          console.log("▲ Python Spell IR Response:", data);
+          // Data dari Python sudah berhasil mendarat di browser tabletmu!
+        })
+        .catch(err => {
+          console.error("▼ Wi-Fi Bridge Transmission Failed:", err);
+        });
+    } catch (e) {
+      console.error("Failed to generate canvas snapshot data stream:", e);
+    }
   }
 }

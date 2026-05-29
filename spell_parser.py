@@ -41,6 +41,7 @@ class DeterministicSpellParser:
     """
     def __init__(self, circularity_threshold: float = 0.72):
         self.circularity_threshold = circularity_threshold
+        self.preloaded_templates = {}
 
     def zhang_suen_thinning(self, binary_mask: np.ndarray) -> np.ndarray:
         """
@@ -772,23 +773,25 @@ class DeterministicSpellParser:
         matching, and compiles the final validated Spell IR schema.
         """
         # 1. Dictionary Template Pre-execution Normalization & Caching
-        templates = {}
-        for category, path in dictionary_paths.items():
-            if not os.path.exists(path):
-                continue
-            try:
-                with open(path, 'r', encoding='utf-8') as f:
-                    data = json.load(f)
-                    for item in data:
-                        class_id = item.get("id")
-                        stroke_template = item.get("strokeTemplate")
-                        if class_id and stroke_template:
-                            # Pre-execution normalization caching
-                            normalized = self._normalize_template(stroke_template)
-                            templates[class_id] = normalized
-            except Exception:
-                # Safe JSON load fallback
-                pass
+        templates = getattr(self, "preloaded_templates", {})
+        if not templates:
+            templates = {}
+            for category, path in dictionary_paths.items():
+                if not os.path.exists(path):
+                    continue
+                try:
+                    with open(path, 'r', encoding='utf-8') as f:
+                        data = json.load(f)
+                        for item in data:
+                            class_id = item.get("id")
+                            stroke_template = item.get("strokeTemplate")
+                            if class_id and stroke_template:
+                                # Pre-execution normalization caching
+                                normalized = self._normalize_template(stroke_template)
+                                templates[class_id] = normalized
+                except Exception:
+                    # Safe JSON load fallback
+                    pass
 
         # 2. Isolate Parent Ring (Preprocessing & Skeletonization)
         parent_contour, ring_metrics = self.isolate_parent_ring(image_array, debug_inspect=False)
