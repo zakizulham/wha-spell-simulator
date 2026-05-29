@@ -37,3 +37,4 @@ debug_output/
 scratch/
 .DS_Store
 Thumbs.db
+.env
